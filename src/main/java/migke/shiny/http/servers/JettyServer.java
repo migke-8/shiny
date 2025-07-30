@@ -2,7 +2,11 @@ package migke.shiny.http.servers;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -11,6 +15,7 @@ import migke.shiny.http.HttpMethod;
 import migke.shiny.http.HttpRequest;
 import migke.shiny.http.HttpResponse;
 import migke.shiny.http.HttpServer;
+import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -18,6 +23,7 @@ import org.eclipse.jetty.util.Callback;
 
 public class JettyServer implements HttpServer {
     private Function<HttpRequest, HttpResponse> handler;
+
     @Override
     public JettyServer setHandler(Function<HttpRequest, HttpResponse> handler) {
         this.handler = handler;
@@ -42,9 +48,9 @@ public class JettyServer implements HttpServer {
 
                     response.setStatus(handlerResponse.status());
                     handlerResponse.headers().forEach(response.getHeaders()::put);
+                    handlerResponse.cookies().forEach((_, value) -> response.getHeaders().add("Set-Cookie", value.toString()));
                     response.write(true, bodyBuffer, callback);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     callback.failed(e);
                 }
                 return true;
@@ -72,7 +78,17 @@ public class JettyServer implements HttpServer {
         req.addHttpStreamWrapper(getWrapper(bodyContent));
         var body = bodyContent.toString();
         var params = new HashMap<String, String>();
-        return new HttpRequest(method, url, headers, body, params);
+        var cookiesString = req.getHeaders().get("Cookie");
+        var cookies = cookiesString != null? this.parseCookies(cookiesString): new HashMap<String, String>();
+        return new HttpRequest(method, url, headers, cookies, body, params);
+    }
+
+    private migke.shiny.http.HttpCookie getWrapper(HttpCookie cookie) {
+        var name = cookie.getName();
+        var value = cookie.getValue();
+        var maxAge = Optional.of(cookie.getMaxAge());
+        Optional<LocalDateTime> expires = cookie.getExpires() != null ? Optional.of(LocalDateTime.ofInstant(cookie.getExpires(), ZoneId.of("UTC"))) : Optional.empty();
+        return new migke.shiny.http.HttpCookie(name, value, expires, maxAge);
     }
 
     private Function<HttpStream, HttpStream> getWrapper(StringBuilder builder) {
@@ -92,5 +108,24 @@ public class JettyServer implements HttpServer {
             }
             return httpStream;
         };
+    }
+
+    private Map<String, String> parseCookies(String string) {
+        var cookies = new HashMap<String, String>();
+        StringBuilder name = new StringBuilder();
+        for (int i = 0; i < string.length(); i++) {
+            if (!Character.isWhitespace(string.charAt(i)))
+                name.append(string.charAt(i));
+            if (string.charAt(i) == '=') {
+                StringBuilder value = new StringBuilder();
+                while (i < string.length() && string.charAt(i + 1) != ';') {
+                    value.append(string.charAt(i));
+                    i++;
+                }
+                cookies.put(name.toString(), value.toString());
+                name = new StringBuilder();
+            }
+        }
+        return cookies;
     }
 }
