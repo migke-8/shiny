@@ -56,7 +56,6 @@ public class SegmentNode {
     public SegmentNode add(String path) {
         var leftCut = cutLeft(path);
         var segment = cutRight(leftCut);
-        System.out.println(segment);
         if(segment.equals(path.replace("/", ""))) return this;
         if (segment.charAt(0) == '{' && segment.charAt(segment.length() - 1) == '}') {
             this.paramNode = this.paramNode != null ? this.paramNode : new ParameterNode(segment.substring(1, segment.length() - 1));
@@ -74,7 +73,6 @@ public class SegmentNode {
 
     public SegmentNode add(HttpRoute route) {
         var node = this.add(route.path());
-        System.out.println(route.method() + " " + node.segment);
         node.handlers.put(route.method(), route.handler());
         return node;
     }
