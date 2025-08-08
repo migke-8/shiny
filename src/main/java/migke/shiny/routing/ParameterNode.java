@@ -15,10 +15,6 @@ public class ParameterNode extends SegmentNode {
         if(path.replace("/", "").equals(value))
             return this.getHandler(method, value);
         return wrapHandler(super.searchHandler(method, path), value);
-        /*var handler = super.searchHandler(method, path);
-        if(handler.isEmpty()) return this.getHandler(method, value);
-        if(!path.replace("/", "").equals(value)) return this.wrapHandler(handler, value);
-        return Optional.empty();*/
     }
     public Optional<Function<HttpRequest, HttpResponse>> getHandler(HttpMethod method, String value) {
         return this.wrapHandler(this.getHandler(method), value);
