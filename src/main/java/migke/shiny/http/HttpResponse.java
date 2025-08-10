@@ -1,11 +1,22 @@
 package migke.shiny.http;
 
+import migke.shiny.exceptions.client.InvalidRequestException;
+import migke.shiny.exceptions.server.ProcessingFailure;
+import migke.shiny.http.status.ClientErrorStatusCode;
+import migke.shiny.http.status.ServerErrorStatusCode;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public record HttpResponse(int status, String body, Map<String, String> headers, Map<String, HttpCookie> cookies) {
     public static HttpResponse Ok(String body) {
         return new HttpResponse(200, body, new HashMap<>(), new HashMap<>());
+    }
+    public static void Throw(String message, ClientErrorStatusCode httpStatusCode) {
+        throw new InvalidRequestException(message, httpStatusCode);
+    }
+    public static void Throw(String message, ServerErrorStatusCode httpStatusCode) {
+        throw new ProcessingFailure(message, httpStatusCode);
     }
 
     public static HttpResponse create(int status) {
