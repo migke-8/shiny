@@ -30,16 +30,15 @@ class Main {
         // optional configuration...
         var app = Shiny.create(Main.getConfig()).route(
             // here is a simple route...
-            path("/", get(req -> HttpResponse.Ok("Hello, world!")),
-                Shiny.nest(
-                    path("/users/:id", post(req -> /* some object here */.add(/* another object here with id: */ req.param("id") /* ... */))),
-                    path(
-                        "/message",
-                        get(req -> /* some response for the route with path /users/:id/message and method GET */),
-                        // oops... some request exception was thrown
-                        // this is a server side error but you alo could call with ClientErrorStatusCode
-                        post(req -> HttpResponse.Throw("Internal server error", ServerErrorStatusCode.INTERNAL_SERVER_ERROR))
-                    )
+            path("/", get(req -> HttpResponse.Ok("Hello, world!"))),
+            nest(
+                path("/users/:id", post(req -> /* some object here */.add(/* another object here with id: */ req.param("id") /* ... */))),
+                path(
+                    "/message",
+                    get(req -> /* some response for the route with path /users/:id/message and method GET */),
+                    // oops... some request exception was thrown
+                    // this is a server side error but you alo could call with ClientErrorStatusCode
+                    post(req -> HttpResponse.Throw("Internal server error", ServerErrorStatusCode.INTERNAL_SERVER_ERROR))
                 )
             )
         );
