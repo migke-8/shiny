@@ -2,7 +2,7 @@
 A simple framework that uses composable building blocks to leverage
 a simple but yet powerful solution to routing and request handling.
 This project aims to give the tools to do a web framework main job,
-while not standing at how it should do it, it follows the philosophy
+while not standing at how it should be done, it follows the philosophy
 of simplicity and minimalism by not implement any additional systems
 on top of the _bread and butter_ of the _thin layer on top a web server_
 that we all know and love.
