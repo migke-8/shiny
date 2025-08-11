@@ -11,8 +11,11 @@ import migke.shiny.routing.Router;
 import migke.shiny.routing.SegmentNode;
 import migke.shiny.server.ServerConfiguration;
 import migke.shiny.server.servers.jetty.JettyServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Shiny extends Router {
+    private static final Logger logger = LoggerFactory.getLogger(Shiny.class);
     private static final long MAX_CONTENT_LENGTH = 10 * 1024 * 1024; // 10MB
     private final ShinyConfiguration config;
 
@@ -29,6 +32,7 @@ public class Shiny extends Router {
                             .orElseThrow(() -> {
                                 var message = "could not find route with path: " + path +
                                         ", and method: " + method;
+                                Shiny.logger.error(message);
                                 return new InvalidRequestException(message, ClientErrorStatusCode.NOT_FOUND);
                             })
                             .apply(req);
@@ -40,6 +44,7 @@ public class Shiny extends Router {
     }
 
     public static Shiny create(ShinyConfiguration config) {
+        Shiny.logger.info("Creating Shiny instance using config: {}", config);
         return new Shiny(config);
     }
 

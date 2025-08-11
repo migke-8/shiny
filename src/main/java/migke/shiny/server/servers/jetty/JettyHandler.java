@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Jetty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,9 @@ public class JettyHandler extends Handler.Abstract {
     private final ServerConfiguration serverConfiguration;
     private final Server server;
 
+    private final AtomicLong requestCounter = new AtomicLong(0);
+    private final AtomicLong responseCounter = new AtomicLong(0);
+
     public JettyHandler(Server server, ServerConfiguration serverConfiguration,
                         Function<HttpRequest, HttpResponse> handler) {
         this.server = server;
@@ -42,6 +47,7 @@ public class JettyHandler extends Handler.Abstract {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
+        JettyHandler.logger.info("request number: {}, arrived with id: {}", requestCounter.incrementAndGet(), request.getId());
         try {
             var threadPool = server.getThreadPool();
             threadPool.execute(() -> {
@@ -49,11 +55,12 @@ public class JettyHandler extends Handler.Abstract {
                     this.translateRequest(request, response, callback);
                 } catch (RequestException e) {
                     response.setStatus(e.statusCode);
+                    JettyHandler.logger.error("Error while handling request", e);
                     callback.failed(e);
                 }
             });
         } catch (Exception e) {
-            logger.error("Error while handling request", e);
+            JettyHandler.logger.error("Error while handling request", e);
             callback.failed(e);
         }
         return true;
@@ -78,7 +85,7 @@ public class JettyHandler extends Handler.Abstract {
             this.addBody(resultingRequest, baseRequest, response, callback);
             return;
         }
-        this.prepareResponse(resultingRequest, response, callback);
+        this.prepareResponse(resultingRequest, baseRequest, response, callback);
     }
 
     private Map<String, String> parseCookies(String string) {
@@ -109,13 +116,13 @@ public class JettyHandler extends Handler.Abstract {
         readNextChunk(resultingRequest, baseRequest, response, callback);
     }
 
-    private void prepareResponse(HttpRequest httpRequest, Response response, Callback callback) {
+    private void prepareResponse(HttpRequest httpRequest, Request request, Response response, Callback callback) {
         var httpResponse = this.handler.apply(httpRequest);
-        respond(httpResponse, response, callback);
+        respond(httpResponse, request, response, callback);
     }
 
     private void respond(
-            HttpResponse resultResponse, Response baseResponse, Callback callback) {
+            HttpResponse resultResponse, Request request, Response baseResponse, Callback callback) {
         var bodyBuffer = ByteBuffer.wrap(resultResponse.body().getBytes(StandardCharsets.UTF_8));
 
         setSecurityHeaders(baseResponse);
@@ -123,15 +130,17 @@ public class JettyHandler extends Handler.Abstract {
         resultResponse.headers().forEach(baseResponse.getHeaders()::put);
         resultResponse.cookies().forEach(
                 (_, value) -> baseResponse.getHeaders().add("Set-Cookie", value.toString()));
+
+        JettyHandler.logger.info("responding request with id: {} and number: {}. number of tried responses until now: {}", request.getId(), requestCounter.get(), responseCounter.incrementAndGet());
         baseResponse.write(true, bodyBuffer, callback);
     }
 
-    private void readNextChunk(HttpRequest resultingRequest, Request request, Response response, Callback callback) {
+    private void readNextChunk(HttpRequest resultingRequest, Request baseRequest, Response response, Callback callback) {
         var contentBuilder = new StringBuilder();
-        request.demand(() -> {
+        baseRequest.demand(() -> {
             try {
                 Content.Chunk chunk;
-                while ((chunk = request.read()) != null) {
+                while ((chunk = baseRequest.read()) != null) {
                     if (Content.Chunk.isFailure(chunk)) {
                         chunk.release();
                         throw new ProcessingFailure("Failed to read request body content.", ServerErrorStatusCode.INTERNAL_SERVER_ERROR);
@@ -156,7 +165,7 @@ public class JettyHandler extends Handler.Abstract {
 
                     if (isLast) {
                         var httpRequest = HttpRequest.addBody(resultingRequest, contentBuilder.toString());
-                        prepareResponse(httpRequest, response, callback);
+                        prepareResponse(httpRequest, baseRequest, response, callback);
                         return;
                     }
                 }
