@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record HttpResponse(int status, String body, Map<String, String> headers, Map<String, HttpCookie> cookies) {
+    public static HttpResponse res(int status, String body) {
+        return new HttpResponse(status, body, new HashMap<>(), new HashMap<>());
+    }
     public static HttpResponse Ok(String body) {
         return new HttpResponse(200, body, new HashMap<>(), new HashMap<>());
     }
