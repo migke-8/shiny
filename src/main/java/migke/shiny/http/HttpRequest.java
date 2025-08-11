@@ -12,7 +12,7 @@ public record HttpRequest(
         Map<String, String> cookies,
         String body,
         Map<String, String> params,
-        Optional<Throwable> exception
+        Optional<RequestException> exception
 ) {
     public static HttpRequest addParam(HttpRequest request, String name, String value) {
         request.params.put(name, value);

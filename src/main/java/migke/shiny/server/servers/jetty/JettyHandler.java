@@ -68,7 +68,11 @@ public class JettyHandler extends Handler.Abstract {
         var cookies =
                 cookiesString != null ? this.parseCookies(cookiesString) : new HashMap<String, String>();
         var params = new HashMap<String, String>();
-        var exception = Optional.ofNullable((Throwable) baseRequest.getAttribute(ErrorHandler.ERROR_EXCEPTION));
+        var throwable = (Throwable) baseRequest.getAttribute(ErrorHandler.ERROR_EXCEPTION);
+        Optional<RequestException> exception = switch (throwable) {
+            case RequestException e -> Optional.of(e);
+            case null, default -> Optional.empty();
+        };
         var resultingRequest = new HttpRequest(method, url, headers, cookies, "", params, exception);
         if (hasContent(baseRequest)) {
             this.addBody(resultingRequest, baseRequest, response, callback);
