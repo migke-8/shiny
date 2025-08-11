@@ -21,7 +21,7 @@ ServerConfiguration(int threads, int timeoutMilliseconds, long maxContentLength,
                                    maxContentLength, errorHandler);
   }
 
-  public ServerConfiguration withMaxContentLength(
+  public ServerConfiguration withErrorHandler(
       Function<HttpRequest, HttpResponse> errorHandler) {
     return new ServerConfiguration(threads, timeoutMilliseconds,
                                    maxContentLength, errorHandler);
