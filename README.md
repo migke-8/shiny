@@ -32,10 +32,15 @@ class Main {
             // here is a simple route...
             path("/", get(req -> HttpResponse.Ok("Hello, world!"))),
             nest(
-                path("/users/:id", post(req -> /* some object here */.add(/* another object here with id: */ req.param("id") /* ... */))),
+                path(
+                    "/users/{id}", 
+                    post(
+                        req -> /* storage */.add(/* object with: */ req.param("id") /* ... */)
+                    )
+                ),
                 path(
                     "/message",
-                    get(req -> /* some response for the route with path /users/:id/message and method GET */),
+                    get(req -> /* some response for the route with path /users/{id}/message and method GET */),
                     // oops... some request exception was thrown
                     // this is a server side error but you alo could call with ClientErrorStatusCode
                     post(req -> HttpResponse.Throw("Internal server error", ServerErrorStatusCode.INTERNAL_SERVER_ERROR))
@@ -69,6 +74,7 @@ class Main {
 > 2. Request object with url, body, method, cookies, etc...
 > 3. response object with status, body, headers and cookies
 # Routing fetures
-> 1. wildcard with the "*" character
-> 2. parameters with the ":" character as a predecessor
+> 1. wildcard with the "**" string as a segment in route path
+> 2. parameters with the "{" character as a predecessor and "}"
+>    as a successor of the segment name
 > 3. grouping routes with the "path" and "nest" functions
