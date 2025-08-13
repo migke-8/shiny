@@ -1,4 +1,5 @@
 # Shiny
+
 A simple framework that uses composable building blocks to leverage
 a simple but yet powerful solution to routing and request handling.
 This project aims to give the tools to do a web framework main job,
@@ -17,9 +18,14 @@ Here is a quick look at the library's API:
 
 ```java
 import migke.shiny.Shiny;
-import migke.shiny.Shiny.*;
+
+import static migke.shiny.Shiny.*;
+import static migke.shiny.http.HttpResponse.Ok;
+import static migke.shiny.http.HttpResponse.Throw;
+import static migke.shiny.http.HttpResponse.res;
+import static migke.shiny.http.status.ServerErrorStatusCode.INTERNAL_SERVER_ERROR;
+
 import migke.shiny.ShinyConfiguration;
-import migke.shiny.http.HttpResponse;
 import migke.shiny.http.status.ServerErrorStatusCode;
 import migke.shiny.server.servers.jetty.JettyServer;
 
@@ -30,50 +36,56 @@ class Main {
         // optional configuration...
         var app = Shiny.create(Main.getConfig()).route(
             // here is a simple route...
-            path("/", get(req -> HttpResponse.Ok("Hello, world!"))),
+            path("/", get(req -> Ok("Hello, world!"))),
             nest(
                 path(
-                    "/users/{id}", 
+                    "/users/{id}",
                     post(
                         req -> /* storage */.add(/* object with: */ req.param("id") /* ... */)
                     )
                 ),
                 path(
                     "/message",
-                    get(req -> /* some response for the route with path /users/{id}/message and method GET */),
+                    get(req -> /* response */ ),
+                        
                     // oops... some request exception was thrown
-                    // this is a server side error but you alo could call with ClientErrorStatusCode
-                    post(req -> HttpResponse.Throw("Internal server error", ServerErrorStatusCode.INTERNAL_SERVER_ERROR))
+                    // this is a server side error but you alo could call
+                    // with ClientErrorStatusCode
+                    post(
+                        req -> Throw("Internal server error", INTERNAL_SERVER_ERROR)
+                    )
                 )
             )
-        );
-        
-        app.listen(8080);
+        ).listen(8080);
     }
 
     public static ShinyConfiguration getConfig() {
         return Shiny.config().withBackend(
-            // can be a custom one, since it corresponds to the HttpServer interface
-            new JettyServer()
-        )
-        .withConfiguration(
-            Shiny.serverConfig()
-                // set the maximum number of threads
-                .withThreads(4)
-                .withErrorHandler((req -> {
-                    var exception = req.exception().get();
-                    return HttpResponse.res(exception.statusCode, "Error: " + exception.getMessage());
-                })
-            )
-        );
+                        // can be a custom one, since it corresponds to the HttpServer interface
+                        new JettyServer()
+                )
+                .withConfiguration(
+                        Shiny.serverConfig()
+                                // set the maximum number of threads
+                                .withThreads(4)
+                                .withErrorHandler((req -> {
+                                            var exception = req.exception().get();
+                                            return res(exception.statusCode, "Error: " + exception.getMessage());
+                                        })
+                                )
+                );
     }
 }
 ```
+
 # Request handling features
+
 > 1. functional handler
 > 2. Request object with url, body, method, cookies, etc...
 > 3. response object with status, body, headers and cookies
+
 # Routing fetures
+
 > 1. wildcard with the "**" string as a segment in route path
 > 2. parameters with the "{" character as a predecessor and "}"
 >    as a successor of the segment name
