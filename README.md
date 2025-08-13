@@ -49,7 +49,7 @@ class Main {
                     get(req -> /* response */ ),
                         
                     // oops... some request exception was thrown
-                    // this is a server side error but you alo could call
+                    // this is a server side error but you could also call
                     // with ClientErrorStatusCode
                     post(
                         req -> Throw("Internal server error", INTERNAL_SERVER_ERROR)
@@ -61,7 +61,8 @@ class Main {
 
     public static ShinyConfiguration getConfig() {
         return Shiny.config()
-            // can be a custom one, since it corresponds to the HttpServer interface
+            // can be a custom one, if it corresponds to the
+            // HttpServer interface
             .withBackend(
                 new JettyServer()
             )
