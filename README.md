@@ -33,7 +33,7 @@ import java.util.HashMap;
 
 class Main {
     public static void main(String[] args) {
-        // optional configuration...
+        // OPTIONAL configuration...
         var app = Shiny.create(Main.getConfig()).route(
             // here is a simple route...
             path("/", get(req -> Ok("Hello, world!"))),
@@ -60,20 +60,21 @@ class Main {
     }
 
     public static ShinyConfiguration getConfig() {
-        return Shiny.config().withBackend(
-                        // can be a custom one, since it corresponds to the HttpServer interface
-                        new JettyServer()
+        return Shiny.config()
+            // can be a custom one, since it corresponds to the HttpServer interface
+            .withBackend(
+                new JettyServer()
+            )
+            .withConfiguration(
+                Shiny.serverConfig()
+                    // set the maximum number of threads
+                    .withThreads(4)
+                    .withErrorHandler((req -> {
+                        var exception = req.exception().get();
+                        return res(exception.statusCode, "Error: " + exception.getMessage());
+                    })
                 )
-                .withConfiguration(
-                        Shiny.serverConfig()
-                                // set the maximum number of threads
-                                .withThreads(4)
-                                .withErrorHandler((req -> {
-                                            var exception = req.exception().get();
-                                            return res(exception.statusCode, "Error: " + exception.getMessage());
-                                        })
-                                )
-                );
+            );
     }
 }
 ```
