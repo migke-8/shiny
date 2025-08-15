@@ -3,7 +3,6 @@ package migke.shiny;
 import java.util.HashMap;
 import java.util.function.Function;
 
-import migke.shiny.exceptions.RequestException;
 import migke.shiny.exceptions.client.InvalidRequestException;
 import migke.shiny.http.HttpResponse;
 import migke.shiny.http.status.ClientErrorStatusCode;
@@ -50,11 +49,10 @@ public class Shiny extends Router {
 
     public static ServerConfiguration serverConfig() {
         return new ServerConfiguration(4, 40 * 1000, MAX_CONTENT_LENGTH, httpRequest -> {
-            var exception = httpRequest.exception().isPresent() ? httpRequest.exception().get() : null;
-            var body = exception != null ? "Error: " + exception.getMessage() : "An internal server error has occurred.";
-            var statusCode = switch (exception) {
+            var body = httpRequest.exception().isPresent()? "Error: " + httpRequest.exception().get().getMessage() : "An internal server error has occurred.";
+            var statusCode = switch (httpRequest.exception().get()) {
                 case null -> 500;
-                default -> exception.statusCode;
+                default -> httpRequest.exception().get().statusCode;
             };
             return new HttpResponse(statusCode, body, new HashMap<>(), new HashMap<>());
         });
