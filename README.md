@@ -15,7 +15,20 @@ while also being effective, ideal for self-hosting (yes, with java) and that
 is its main purpose.
 
 Here is a quick look at the library's API:
+```java
+import migke.shiny.Shiny;
+import static migke.shiny.Shiny.*;
+import static migke.shiny.http.HttpResponse.Ok;
 
+class Main {
+    public static void main(String[] args) {
+        var app = Shiny.create()
+            .route(path("/", get(req -> Ok("Hello, world!"))))
+            .listen(8080);
+    }
+}
+```
+A bigger example:
 ```java
 import migke.shiny.Shiny;
 
@@ -28,8 +41,6 @@ import static migke.shiny.http.status.ServerErrorStatusCode.INTERNAL_SERVER_ERRO
 import migke.shiny.ShinyConfiguration;
 import migke.shiny.http.status.ServerErrorStatusCode;
 import migke.shiny.server.servers.jetty.JettyServer;
-
-import java.util.HashMap;
 
 class Main {
     public static void main(String[] args) {
