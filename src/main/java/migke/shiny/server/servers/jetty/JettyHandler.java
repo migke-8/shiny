@@ -24,7 +24,6 @@ import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.Callback;
-import org.eclipse.jetty.util.Jetty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +32,12 @@ public class JettyHandler extends Handler.Abstract {
 
     private final Function<HttpRequest, HttpResponse> handler;
     private final ServerConfiguration serverConfiguration;
-    private final Server server;
 
     private final AtomicLong requestCounter = new AtomicLong(0);
     private final AtomicLong responseCounter = new AtomicLong(0);
 
-    public JettyHandler(Server server, ServerConfiguration serverConfiguration,
+    public JettyHandler(ServerConfiguration serverConfiguration,
                         Function<HttpRequest, HttpResponse> handler) {
-        this.server = server;
         this.serverConfiguration = serverConfiguration;
         this.handler = handler;
     }
@@ -49,18 +46,13 @@ public class JettyHandler extends Handler.Abstract {
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
         JettyHandler.logger.info("request number: {}, arrived with id: {}", requestCounter.incrementAndGet(), request.getId());
         try {
-            var threadPool = server.getThreadPool();
-            threadPool.execute(() -> {
-                try {
-                    this.translateRequest(request, response, callback);
-                } catch (RequestException e) {
-                    response.setStatus(e.statusCode);
-                    JettyHandler.logger.error("Error while handling request", e);
-                    callback.failed(e);
-                }
-            });
-        } catch (Exception e) {
-            JettyHandler.logger.error("Error while handling request", e);
+            this.translateRequest(request, response, callback);
+        } catch (RequestException e) {
+            response.setStatus(e.statusCode);
+            JettyHandler.logger.error("Error while handling request number: {}", requestCounter.get(), e);
+            callback.failed(e);
+        } catch(Exception e) {
+            JettyHandler.logger.error("Error while handling request number: {}", requestCounter.get(), e);
             callback.failed(e);
         }
         return true;

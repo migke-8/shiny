@@ -25,7 +25,7 @@ public class JettyServer implements HttpServer {
 
   @Override
   public JettyServer setHandler(Function<HttpRequest, HttpResponse> handler) {
-    this.handler = new JettyHandler(this.server, this.config, handler);
+    this.handler = new JettyHandler(this.config, handler);
     return this;
   }
 
@@ -53,7 +53,7 @@ public class JettyServer implements HttpServer {
     pool.setMaxThreads(config.threads());
     pool.setMinThreads(1);
     this.server = new Server(pool);
-    this.server.setErrorHandler(new JettyHandler(this.server, this.config, config.errorHandler()));
+    this.server.setErrorHandler(new JettyHandler(this.config, config.errorHandler()));
     this.server.setStopAtShutdown(true);
   }
 }
