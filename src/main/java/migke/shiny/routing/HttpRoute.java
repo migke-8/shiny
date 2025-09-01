@@ -6,5 +6,8 @@ import migke.shiny.http.HttpResponse;
 
 import java.util.function.Function;
 
-public record HttpRoute(HttpMethod method, String path, Function<HttpRequest, HttpResponse> handler) {
+public record HttpRoute(HttpRouteDefinition definition,  Function<HttpRequest, HttpResponse> handler) {
+    public static HttpRoute of(HttpMethod method, String path, Function<HttpRequest, HttpResponse> handler) {
+        return new HttpRoute(new HttpRouteDefinition(method, path), handler);
+    }
 }

@@ -72,8 +72,8 @@ public class SegmentNode {
     }
 
     public SegmentNode add(HttpRoute route) {
-        var node = this.add(route.path());
-        node.handlers.put(route.method(), route.handler());
+        var node = this.add(route.definition().path());
+        node.handlers.put(route.definition().method(), route.handler());
         return node;
     }
 

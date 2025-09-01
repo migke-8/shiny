@@ -11,16 +11,25 @@ import java.util.stream.Stream;
 
 public abstract class Router {
     private final SegmentNode root;
+    private final RouteCache cache;
 
-    private Router(SegmentNode root) {
+    private Router(SegmentNode root, int cacheSize) {
         this.root = root;
+        this.cache = new RouteCache(cacheSize);
     }
-    public Router() {
+    public Router(int cacheSize) {
         this.root = new SegmentNode("");
+        this.cache = new RouteCache(cacheSize);
     }
 
     protected Optional<Function<HttpRequest, HttpResponse>> findHandler(HttpMethod method, String path) {
-        return root.searchHandler(method, path);
+        var foundInCache = this.cache.get(new HttpRouteDefinition(method, path));
+        System.out.println("cache: "+foundInCache.isPresent());
+        if(foundInCache.isPresent()) return Optional.of(foundInCache.get().handler());
+        var found = root.searchHandler(method, path);
+        System.out.println("tree: "+found.isPresent());
+        if(found.isPresent()) this.cache.set(HttpRoute.of(method, path, found.get()));
+        return found;
     }
 
     public Router route(Function<SegmentNode, SegmentNode>... funcs) {
@@ -47,18 +56,18 @@ public abstract class Router {
     }
 
     public static HttpRoute get(Function<HttpRequest, HttpResponse> handler) {
-        return new HttpRoute(HttpMethod.GET, "", handler);
+        return HttpRoute.of(HttpMethod.GET, "", handler);
     }
     public static HttpRoute post(Function<HttpRequest, HttpResponse> handler) {
-        return new HttpRoute(HttpMethod.POST, "", handler);
+        return HttpRoute.of(HttpMethod.POST, "", handler);
     }
     public static HttpRoute put(Function<HttpRequest, HttpResponse> handler) {
-        return new HttpRoute(HttpMethod.PUT, "", handler);
+        return HttpRoute.of(HttpMethod.PUT, "", handler);
     }
     public static HttpRoute patch(Function<HttpRequest, HttpResponse> handler) {
-        return new HttpRoute(HttpMethod.PATCH, "", handler);
+        return HttpRoute.of(HttpMethod.PATCH, "", handler);
     }
     public static HttpRoute delete(Function<HttpRequest, HttpResponse> handler) {
-        return new HttpRoute(HttpMethod.DELETE, "", handler);
+        return HttpRoute.of(HttpMethod.DELETE, "", handler);
     }
 }
