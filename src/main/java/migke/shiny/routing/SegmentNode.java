@@ -30,7 +30,7 @@ public class SegmentNode {
 
     public Optional<Function<HttpRequest, HttpResponse>> searchHandler(HttpMethod method, String path) {
         var leftCut = cutLeft(path);
-        if(leftCut.isEmpty()) return Optional.empty();
+        if(leftCut.isEmpty()) return this.getHandler(method);
         var segment = cutRight(leftCut);
         var staticNode = this.children.get(segment);
         if(staticNode != null) {
