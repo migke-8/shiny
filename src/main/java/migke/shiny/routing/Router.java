@@ -13,10 +13,6 @@ public abstract class Router {
     private final SegmentNode root;
     private final RouteCache cache;
 
-    private Router(SegmentNode root, int cacheSize) {
-        this.root = root;
-        this.cache = new RouteCache(cacheSize);
-    }
     public Router(int cacheSize) {
         this.root = new SegmentNode("");
         this.cache = new RouteCache(cacheSize);

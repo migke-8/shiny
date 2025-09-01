@@ -94,17 +94,4 @@ public class SegmentNode {
         var index = url.indexOf("/");
         return index == -1 ? url : url.substring(0, index);
     }
-
-    private SegmentNode getCorrectNode(String segment) {
-        if (segment.replace("/", "").isEmpty()) return null;
-        var node = this;
-        var child = node.children.get(segment);
-        var paramNode = node.paramNode;
-        var wildCardNode = node.wildCardNode;
-        if (child != null)
-            return child;
-        else if (paramNode != null)
-            return paramNode;
-        else return wildCardNode;
-    }
 }
