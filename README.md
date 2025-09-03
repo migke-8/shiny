@@ -96,6 +96,7 @@ class Main {
 > 1. functional handler
 > 2. Request object with url, body, method, cookies, etc...
 > 3. response object with status, body, headers and cookies
+> 4. error handling
 
 # Routing fetures
 
