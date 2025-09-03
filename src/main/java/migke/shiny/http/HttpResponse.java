@@ -15,10 +15,10 @@ public record HttpResponse(int status, String body, Map<String, String> headers,
     public static HttpResponse Ok(String body) {
         return new HttpResponse(200, body, new HashMap<>(), new HashMap<>());
     }
-    public static void Throw(String message, ClientErrorStatusCode httpStatusCode) {
+    public static void Error(String message, ClientErrorStatusCode httpStatusCode) {
         throw new InvalidRequestException(message, httpStatusCode);
     }
-    public static void Throw(String message, ServerErrorStatusCode httpStatusCode) {
+    public static void Error(String message, ServerErrorStatusCode httpStatusCode) {
         throw new ProcessingFailure(message, httpStatusCode);
     }
 

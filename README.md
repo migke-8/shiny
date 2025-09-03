@@ -34,7 +34,7 @@ import migke.shiny.Shiny;
 
 import static migke.shiny.Shiny.*;
 import static migke.shiny.http.HttpResponse.Ok;
-import static migke.shiny.http.HttpResponse.Throw;
+import static migke.shiny.http.HttpResponse.Error;
 import static migke.shiny.http.HttpResponse.res;
 import static migke.shiny.http.status.ServerErrorStatusCode.INTERNAL_SERVER_ERROR;
 
@@ -63,7 +63,7 @@ class Main {
                     // this is a server side error but you could also call
                     // with ClientErrorStatusCode
                     post(
-                        req -> Throw("Internal server error", INTERNAL_SERVER_ERROR)
+                        req -> Error("Internal server error", INTERNAL_SERVER_ERROR)
                     )
                 )
             )
