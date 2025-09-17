@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record HttpResponse(int status, String body, Map<String, String> headers, Map<String, HttpCookie> cookies) {
-    public static HttpResponse res(int status, String body) {
-        return new HttpResponse(status, body, new HashMap<>(), new HashMap<>());
-    }
     public static HttpResponse Ok(String body) {
         return new HttpResponse(200, body, new HashMap<>(), new HashMap<>());
     }
@@ -22,13 +19,16 @@ public record HttpResponse(int status, String body, Map<String, String> headers,
         throw new ProcessingFailure(message, httpStatusCode);
     }
 
-    public static HttpResponse create(int status) {
+    public static HttpResponse Response(int status) {
         return new HttpResponse(status, "", new HashMap<>(), new HashMap<>());
     }
-    public static HttpResponse create(int status, String body) {
+    public static HttpResponse Response(int status, String body) {
         return new HttpResponse(status, body, new HashMap<>(), new HashMap<>());
     }
 
+    public HttpResponse withStatusCode(int code) {
+        return new HttpResponse(code, body, new HashMap<>(this.headers), new HashMap<>(this.cookies));
+    }
     public HttpResponse withHeader(String key, String value) {
         headers.put(key, value);
         return new HttpResponse(this.status, body, new HashMap<>(this.headers), new HashMap<>(this.cookies));
