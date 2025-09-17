@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class RouteCache {
-    private final Map<HttpRouteDefinition, HttpRoute> map;
+    private final Map<HttpRouteDefinition, Integer> map;
     private HttpRoute[] routes;
     private int counter;
     private int addIndex;
@@ -24,7 +24,7 @@ public class RouteCache {
     }
 
     public Optional<HttpRoute> get(HttpRouteDefinition definition) {
-        return Optional.ofNullable(map.get(definition));
+        return Optional.ofNullable(routes[map.get(definition)]);
     }
 
     private void clear() {
@@ -38,7 +38,7 @@ public class RouteCache {
 
     private void add(HttpRoute route) {
         this.routes[this.addIndex] = route;
-        this.map.put(route.definition(), route);
+        this.map.put(route.definition(), addIndex);
         this.addIndex = (this.addIndex + 1) % this.size;
     }
 
