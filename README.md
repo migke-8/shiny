@@ -9,6 +9,9 @@
     1. [routing](#routing-documentation)
     1. [configuration](#configuration-documentation)
     1. [request and response objects](#request-and-response-objects-documentation)
+    1. [routing documentation](#routing-documentation)
+    1. [configuration documentation](#configuration-documentation)
+
 ## Description
 A simple framework that uses composable building blocks to leverage
 a simple but yet powerful solution to routing and request handling.
@@ -30,6 +33,7 @@ that we all know and love.
 ### Request handling features
 > 1. functional handler
 > 2. request object with URL, body, method, cookies, etc...
+> 2. request object with url, body, method, cookies, etc...
 > 3. response object with status, body, headers and cookies
 > 4. error handling
 
