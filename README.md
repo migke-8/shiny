@@ -75,7 +75,7 @@ Explanation: the first thing you should notice is the _create_ method which is c
 To create a route you first need to understand that each one of those are just branches in a tree like structure containing some nodes that in essence contains the segments of the path name and a possible HTTP method which signals the framework internal engine where is the handler for the incoming request.
 
 1. ```Shiny.get(Function<HttpRequest, HttpResponse>) // or another HTTP verb```: creates a route containing the specified HTTP method and handler for being attached to some node
-    1. ```Shiny.path(String path, ...)```: creates a node containing the specified path name, and need to receive a node with some HTTP method and a handler to create something reachable by the user
+1. ```Shiny.path(String path, ...)```: creates a node containing the specified path name, and need to receive a node with some HTTP method and a handler to create something reachable by the user
 1. ```Shiny.nest(...)```: combine multiple nodes into a single branch
 
 ### Configuration documentation
@@ -87,6 +87,7 @@ All configurations can be customized to your own needs.
     1. ```withCacheSize(int size)```: defines size of the cache
 1. ```Shiny.serverConfig()```: creates the default server configuration used by ```Shiny.config()```, contains:
     1. ```withThreads(int threads)```: defines the maximum number of threads
+    1. ```withMaxContentLength(int maxContentLength)```: defines the maximum size of the request payload in bytes 
     1. ```withTimeoutMilliseconds(int timeoutMilliseconds)```: defines the maximum amount of time that the server can wait for a single request to finish in milliseconds
     1. ```withErrorHandler(Function<HttpRequest, HttpResponse> errorHandler)```: defines a handler for error case scenarios
 
@@ -109,7 +110,7 @@ A handler in Shiny is just a function that receives a request and returns a resp
     1. ```String cookie(String name)```
 1. ```migke.shiny.http.HttpResponse``` instances contains:
     1. ```withStatusCode(int code)```
-    1.```withHeader(String key, String value)```
+    1. ```withHeader(String key, String value)```
     1. ```withHeaders(Map<String, String> headers)```
     1. ```withCookies(Map<String, HttpCookie> cookies)```
     1. ```withBody(String body)```
