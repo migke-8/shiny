@@ -18,13 +18,14 @@ public class RouteCache {
     }
 
     public void set(HttpRoute route) {
-        if(this.canAdd(route)) this.add(route);
+        if (this.canAdd(route)) this.add(route);
         this.safelyIncrementCounter();
-        if(this.canClear()) clear();
+        if (this.canClear()) clear();
     }
 
     public Optional<HttpRoute> get(HttpRouteDefinition definition) {
-        return Optional.ofNullable(routes[map.get(definition)]);
+        var index = map.get(definition);
+        return Optional.ofNullable(index != null ? routes[index] : null);
     }
 
     private void clear() {
@@ -43,10 +44,11 @@ public class RouteCache {
     }
 
     private boolean canAdd(HttpRoute route) {
-        var isSpaceAvailable = routes[addIndex]== null;
+        var isSpaceAvailable = routes[addIndex] == null;
         var doesExist = map.containsKey(route.definition());
         return isSpaceAvailable && !doesExist;
     }
+
     private void safelyIncrementCounter() {
         this.counter = (this.counter + 1) % this.size;
     }
