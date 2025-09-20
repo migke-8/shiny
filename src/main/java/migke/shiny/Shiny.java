@@ -21,7 +21,7 @@ public class Shiny extends Router {
 	public Shiny(ShinyConfiguration config) {
 		super(config.cacheSize());
 		this.config = config;
-		this.config.backend().configure(config.configuration()).setHandler((req) -> {
+		this.config.backEnd().configure(config.backEndConfiguration()).setHandler((req) -> {
 			var method = req.method();
 			var url = req.url().replaceFirst("(http|https)://", "");
 			var path = url.substring(url.indexOf('/'));
@@ -65,7 +65,7 @@ public class Shiny extends Router {
 	}
 
 	public Shiny listen(int port) {
-		this.config.backend().listen(port);
+		this.config.backEnd().listen(port);
 		return this;
 	}
 }
